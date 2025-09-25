@@ -147,6 +147,14 @@
             background-color: #fee2e2;
             color: #991b1b;
         }
+        
+        .calculation-steps {
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -388,28 +396,28 @@
                 <p class="text-gray-700 mb-6">Large numbers are used in everyday life to represent populations, distances, money, and more. Understanding these numbers helps us make sense of the world.</p>
                 
                 <div class="game-area p-6 mb-6">
-                    <h3 class="text-lg font-semibold mb-4">Which is Larger?</h3>
+                    <h3 class="text-lg font-semibold mb-4" id="real-life-question">Which has a larger population?</h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                            <h4 class="font-semibold text-blue-800 mb-2">Population of Mumbai</h4>
+                            <h4 class="font-semibold text-blue-800 mb-2" id="real-life-item1">Population of Mumbai</h4>
                             <p class="text-2xl font-bold text-center" id="real-life-num1">2,14,00,000</p>
-                            <p class="text-center text-sm text-gray-600">people</p>
+                            <p class="text-center text-sm text-gray-600" id="real-life-unit1">people</p>
                         </div>
                         <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                            <h4 class="font-semibold text-green-800 mb-2">Population of Delhi</h4>
+                            <h4 class="font-semibold text-green-800 mb-2" id="real-life-item2">Population of Delhi</h4>
                             <p class="text-2xl font-bold text-center" id="real-life-num2">1,90,00,000</p>
-                            <p class="text-center text-sm text-gray-600">people</p>
+                            <p class="text-center text-sm text-gray-600" id="real-life-unit2">people</p>
                         </div>
                     </div>
                     
                     <div class="text-center mb-4">
-                        <p class="font-semibold">Which city has a larger population?</p>
+                        <p class="font-semibold">Which is larger?</p>
                     </div>
                     
                     <div class="flex justify-center space-x-4 mb-6">
-                        <button class="real-life-option bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition" data-option="1">Mumbai</button>
-                        <button class="real-life-option bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition" data-option="2">Delhi</button>
+                        <button class="real-life-option bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition" data-option="1">First Option</button>
+                        <button class="real-life-option bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 transition" data-option="2">Second Option</button>
                     </div>
                     
                     <div class="text-center">
@@ -439,15 +447,20 @@
                             <div id="operation-symbol" class="text-3xl font-bold w-16 text-center">+</div>
                             <input type="number" id="operand2" class="w-32 p-2 border rounded text-center text-xl" value="3789">
                             <div class="text-3xl font-bold w-16 text-center">=</div>
-                            <input type="number" id="operation-result" class="w-32 p-2 border rounded text-center text-xl" placeholder="?">
+                            <div class="w-32 p-2 border rounded text-center text-xl bg-white" id="operation-result">?</div>
                         </div>
                         
                         <div class="flex justify-center space-x-4 mb-4">
-                            <button class="operation-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition" data-operation="+">+ Add</button>
+                            <button class="operation-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" data-operation="+">+ Add</button>
                             <button class="operation-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition" data-operation="-">- Subtract</button>
                             <button class="operation-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition" data-operation="×">× Multiply</button>
                             <button class="operation-btn bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition" data-operation="÷">÷ Divide</button>
                         </div>
+                    </div>
+                    
+                    <div id="calculation-steps" class="calculation-steps hidden">
+                        <p class="font-semibold mb-2">Calculation Steps:</p>
+                        <div id="steps-content"></div>
                     </div>
                     
                     <div class="text-center">
@@ -995,30 +1008,34 @@
                 const numStr = currentNumber.toString();
                 const digits = numStr.split('').map(Number);
                 
-                // Define place values based on system (natural order: Units, Tens, Hundreds...)
+                // Define place values based on system
                 let placeValues;
                 if (currentSystem === 'indian') {
-                    placeValues = ['Units', 'Tens', 'Hundreds', 'Thousands', 'Ten Thousands', 'Lakhs', 'Ten Lakhs', 'Crores', 'Ten Crores'];
+                    placeValues = ['Units', 'Tens', 'Hundreds', 'Thousands', 'Ten Thousands', 'Lakhs', 'Ten Lakhs', 'Crores'];
                 } else {
-                    placeValues = ['Ones', 'Tens', 'Hundreds', 'Thousands', 'Ten Thousands', 'Hundred Thousands', 'Millions', 'Ten Millions', 'Hundred Millions', 'Billions'];
+                    placeValues = ['Ones', 'Tens', 'Hundreds', 'Thousands', 'Ten Thousands', 'Hundred Thousands', 'Millions', 'Ten Millions'];
                 }
                 
                 // Clear previous content
                 headersElement.innerHTML = '';
                 digitsElement.innerHTML = '';
                 
-                // Create headers and digits row, prepending to ensure right-to-left visual order
-                for (let i = 0; i < digits.length; i++) {
-                    const digit = digits[digits.length - 1 - i]; // Get digit from right to left
-                    const placeValueName = placeValues[i] || '---'; // Get place value name from right to left
-
+                // We need to display the digits from right to left (units first)
+                // So we reverse the digits array for display
+                const reversedDigits = [...digits].reverse();
+                
+                // Create headers (from right to left)
+                for (let i = 0; i < reversedDigits.length; i++) {
                     const th = document.createElement('th');
-                    th.textContent = placeValueName;
+                    th.textContent = placeValues[i] || '---';
                     th.className = 'p-2 bg-gray-100';
-                    headersElement.prepend(th); // Prepend to put higher place values on the left
-
+                    headersElement.appendChild(th);
+                }
+                
+                // Create digits row (from right to left)
+                for (let i = 0; i < reversedDigits.length; i++) {
                     const td = document.createElement('td');
-                    td.textContent = digit;
+                    td.textContent = reversedDigits[i];
                     td.className = 'p-2';
                     
                     // Add click event to highlight place value
@@ -1030,10 +1047,13 @@
                         
                         // Add active class to clicked cell
                         this.classList.add('active');
+                        
+                        // Show the place value name
+                        const placeValueName = placeValues[i] || 'Unknown';
                         playSound(snapSound);
                     });
                     
-                    digitsElement.prepend(td); // Prepend to put digits corresponding to higher place values on the left
+                    digitsElement.appendChild(td);
                 }
             }
         }
@@ -1102,8 +1122,13 @@
 
         // Section 5: Real Life Numbers
         function initializeSection4() {
+            const questionElement = document.getElementById('real-life-question');
+            const item1Element = document.getElementById('real-life-item1');
+            const item2Element = document.getElementById('real-life-item2');
             const num1Element = document.getElementById('real-life-num1');
             const num2Element = document.getElementById('real-life-num2');
+            const unit1Element = document.getElementById('real-life-unit1');
+            const unit2Element = document.getElementById('real-life-unit2');
             const options = document.querySelectorAll('.real-life-option');
             const checkButton = document.getElementById('check-real-life');
             const newButton = document.getElementById('new-real-life');
@@ -1112,6 +1137,7 @@
             let num1, num2;
             let selectedOption = null;
             let correctAnswer;
+            let currentComparison = {};
             
             // Initialize numbers
             generateRealLifeNumbers();
@@ -1157,49 +1183,78 @@
             });
             
             function generateRealLifeNumbers() {
-                // Real-life data examples (simplified)
+                // Real-life data examples
                 const data = [
-                    { item1: "Mumbai Population", value1: 21400000, type1: "population", item2: "Delhi Population", value2: 19000000, type2: "population" },
-                    { item1: "Earth to Moon Distance", value1: 384400, type1: "distance", item2: "Earth to Mars Distance", value2: 225000000, type2: "distance" },
-                    { item1: "Indian Budget", value1: 3900000, type1: "money", item2: "US Budget", value2: 6000000, type2: "money" },
-                    { item1: "Amazon River Length", value1: 6400, type1: "distance", item2: "Nile River Length", value2: 6650, type2: "distance" },
-                    { item1: "World Population", value1: 8000000000, type1: "population", item2: "Internet Users", value2: 5000000000, type2: "population" }
+                    { 
+                        item1: "Mumbai Population", 
+                        value1: 21400000, 
+                        item2: "Delhi Population", 
+                        value2: 19000000,
+                        unit: "people",
+                        question: "Which city has a larger population?"
+                    },
+                    { 
+                        item1: "Earth to Moon Distance", 
+                        value1: 384400, 
+                        item2: "Earth to Mars Distance", 
+                        value2: 225000000,
+                        unit: "km",
+                        question: "Which distance is greater?"
+                    },
+                    { 
+                        item1: "Indian Budget", 
+                        value1: 3900000, 
+                        item2: "US Budget", 
+                        value2: 6000000,
+                        unit: "million USD",
+                        question: "Which budget is larger?"
+                    },
+                    { 
+                        item1: "Amazon River Length", 
+                        value1: 6400, 
+                        item2: "Nile River Length", 
+                        value2: 6650,
+                        unit: "km",
+                        question: "Which river is longer?"
+                    },
+                    { 
+                        item1: "World Population", 
+                        value1: 8000000000, 
+                        item2: "Internet Users", 
+                        value2: 5000000000,
+                        unit: "people",
+                        question: "Which number is larger?"
+                    }
                 ];
                 
                 const randomData = data[Math.floor(Math.random() * data.length)];
+                currentComparison = randomData;
                 
-                let displayItem1 = randomData.item1;
-                let displayItem2 = randomData.item2;
-                let val1 = randomData.value1;
-                let val2 = randomData.value2;
-                let type = randomData.type1; // Assuming types are consistent for a pair
-
+                num1 = randomData.value1;
+                num2 = randomData.value2;
+                
                 // Randomly swap which is displayed first
                 if (Math.random() > 0.5) {
-                    [val1, val2] = [val2, val1];
-                    [displayItem1, displayItem2] = [displayItem2, displayItem1];
+                    [num1, num2] = [num2, num1];
+                    [randomData.item1, randomData.item2] = [randomData.item2, randomData.item1];
                 }
                 
-                num1Element.textContent = formatIndianNumber(val1);
-                num2Element.textContent = formatIndianNumber(val2);
+                // Update the question and items
+                questionElement.textContent = randomData.question;
+                item1Element.textContent = randomData.item1;
+                item2Element.textContent = randomData.item2;
+                unit1Element.textContent = randomData.unit;
+                unit2Element.textContent = randomData.unit;
                 
-                // Update the item names
-                document.querySelector('#real-life-num1').parentElement.querySelector('h4').textContent = displayItem1;
-                document.querySelector('#real-life-num2').parentElement.querySelector('h4').textContent = displayItem2;
+                num1Element.textContent = formatIndianNumber(num1);
+                num2Element.textContent = formatIndianNumber(num2);
                 
-                // Dynamically set the question text
-                let questionText = "Which is larger?";
-                if (type === "population") {
-                    questionText = "Which has a larger population?";
-                } else if (type === "distance") {
-                    questionText = "Which distance is greater?";
-                } else if (type === "money") {
-                    questionText = "Which amount is greater?";
-                }
-                document.querySelector('#section-4 .game-area > div.text-center.mb-4 > p').textContent = questionText;
-
+                // Update option buttons
+                options[0].textContent = randomData.item1;
+                options[1].textContent = randomData.item2;
+                
                 // Determine correct answer
-                correctAnswer = val1 > val2 ? 1 : 2;
+                correctAnswer = num1 > num2 ? 1 : 2;
             }
             
             function formatIndianNumber(num) {
@@ -1221,11 +1276,13 @@
             const operand1 = document.getElementById('operand1');
             const operand2 = document.getElementById('operand2');
             const operationSymbol = document.getElementById('operation-symbol');
-            const resultInput = document.getElementById('operation-result');
+            const resultElement = document.getElementById('operation-result');
             const operationButtons = document.querySelectorAll('.operation-btn');
             const calculateButton = document.getElementById('calculate-operation');
             const newButton = document.getElementById('new-operation');
             const feedback = document.getElementById('operation-feedback');
+            const calculationSteps = document.getElementById('calculation-steps');
+            const stepsContent = document.getElementById('steps-content');
             
             let currentOperation = '+';
             
@@ -1243,6 +1300,7 @@
                     this.classList.add('bg-blue-600', 'text-white');
                     currentOperation = this.getAttribute('data-operation');
                     operationSymbol.textContent = currentOperation;
+                    calculationSteps.classList.add('hidden');
                     playSound(machineSound);
                 });
             });
@@ -1258,28 +1316,39 @@
                 if (isNaN(num1) || isNaN(num2)) {
                     feedback.textContent = 'Please enter valid numbers.';
                     feedback.className = 'text-red-600';
-                    playSound(failureSound);
                     return;
                 }
-
-                let calculatedResult;
+                
+                let correctAnswer;
+                let steps = [];
+                
                 switch (currentOperation) {
-                    case '+': calculatedResult = num1 + num2; break;
-                    case '-': calculatedResult = num1 - num2; break;
-                    case '×': calculatedResult = num1 * num2; break;
+                    case '+': 
+                        correctAnswer = num1 + num2; 
+                        steps.push(`${num1} + ${num2} = ${correctAnswer}`);
+                        break;
+                    case '-': 
+                        correctAnswer = num1 - num2; 
+                        steps.push(`${num1} - ${num2} = ${correctAnswer}`);
+                        break;
+                    case '×': 
+                        correctAnswer = num1 * num2; 
+                        steps.push(`${num1} × ${num2} = ${correctAnswer}`);
+                        break;
                     case '÷': 
-                        if (num2 === 0) {
-                            feedback.textContent = 'Cannot divide by zero!';
-                            feedback.className = 'text-red-600';
-                            playSound(failureSound);
-                            return;
-                        }
-                        calculatedResult = Math.round(num1 / num2); // Round for simplicity
+                        correctAnswer = Math.round((num1 / num2) * 100) / 100; 
+                        steps.push(`${num1} ÷ ${num2} = ${correctAnswer}`);
                         break;
                 }
                 
-                resultInput.value = calculatedResult.toLocaleString(); // Display the calculated result
-                feedback.textContent = `The result is ${calculatedResult.toLocaleString()}.`;
+                // Show the result
+                resultElement.textContent = correctAnswer.toLocaleString();
+                
+                // Show calculation steps
+                stepsContent.innerHTML = steps.map(step => `<p>${step}</p>`).join('');
+                calculationSteps.classList.remove('hidden');
+                
+                feedback.textContent = `The answer is ${correctAnswer.toLocaleString()}`;
                 feedback.className = 'text-green-600';
                 playSound(successSound);
                 completedSections.add(5);
@@ -1289,7 +1358,8 @@
             // New numbers
             newButton.addEventListener('click', function() {
                 generateNumbers();
-                resultInput.value = '';
+                resultElement.textContent = '?';
+                calculationSteps.classList.add('hidden');
                 feedback.textContent = '';
                 playSound(machineSound);
             });
